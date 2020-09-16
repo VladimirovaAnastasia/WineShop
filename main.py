@@ -6,14 +6,28 @@ import datetime
 import pandas
 from collections import defaultdict
 
-excel_data_df = pandas.read_excel('wine.xlsx',
+import argparse
+
+def create_parser():
+    parser = argparse.ArgumentParser(description='The source of file and name')
+    parser.add_argument('file_path', help='The source of file', default='wine.xlsx')
+
+    return parser
+
+parser = create_parser()
+args = parser.parse_args()
+file_path = args.file_path
+
+excel_data_df = pandas.read_excel(file_path,
                                   usecols=['Категория', 'Название', 'Сорт', 'Цена', 'Картинка', 'Акция'],
                                   na_values='nan',
                                   keep_default_na=False)
 products = excel_data_df.to_dict(orient='record')
-sorted_products = defaultdict(list)
+structured_products = defaultdict(list)
 for product in products:
-    sorted_products[product['Категория']].append(product)
+    structured_products[product['Категория']].append(product)
+
+
 
 now_year = datetime.datetime.now().year
 burn_year = 1920
@@ -28,7 +42,7 @@ template = env.get_template('template.html')
 
 rendered_page = template.render(
     working_years=(now_year - burn_year),
-    sorted_products=sorted_products
+    structured_products=structured_products
 )
 
 
